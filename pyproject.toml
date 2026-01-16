@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=80.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comet-sdkp"
+version = "0.1.0"
+description = "COMET SDKP Community Edition Python SDK"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+
+authors = [{ name = "STARION GROUP" }]
+
+maintainers = [{ name = "COMET Community" }]
+
+keywords = ["sdk", "COMET", "sdkp"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [ "pythonnet>=3.0.5" ]
+
+[project.optional-dependencies]
+
+# Doc dependencies
+docs = [
+    "sphinx>=7.2",
+    "myst-parser>=2.0",
+    "pydata-sphinx-theme>=0.15",
+    "sphinx-autodoc-typehints>=2.0",
+]
+
+# Development dependencies
+dev = ["pytest>=9.0", "black>=24.0", "isort>=5.13", "build>=1.0"]
+
+[project.urls]
+Homepage = "https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition"
+Repository = "https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition"
+Issues = "https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/issues"
+Documentation = "https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition#readme"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+"comet_sdkp" = ["libs/*"]
+
+[tool.pytest.ini_options]
+minversion = "9.0.2"
+addopts = "-ra -q"
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"

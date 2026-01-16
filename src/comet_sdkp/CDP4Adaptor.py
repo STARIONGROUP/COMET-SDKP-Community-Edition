@@ -1,11 +1,55 @@
-﻿import sys
+﻿"""
+
+Module: CDP4Adaptor
+
+Description:
+
+    This module serves as a wrapper to the C++ CDP4 SDK in python.
+
+Scope:
+
+    This module is part of the integration between COMET and YODA.
+
+Author:
+
+    STARION GROUP
+
+Created:
+
+    2026-01-09
+
+Version:
+
+    0.1.0
+
+License:
+
+    LGPL-2.1 license
+
+Dependencies:
+
+    - pythonnet
+
+Notes:
+
+    This module is a first aproach to covering all the CDP4 functionalities with a python library.
+
+"""
+
+###################################################################################################
+#                                                                                                 #
+#                                            IMPORTS                                              #
+#                                                                                                 #
+###################################################################################################
+
+import sys
 import os
 from typing import List, Tuple
 
 import clr
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-dll_folder = os.path.join(script_dir, "DLLs")
+dll_folder = os.path.join(script_dir, "libs")
 sys.path.append(dll_folder)
 
 try:
@@ -19,16 +63,37 @@ from System import Guid, Uri, Predicate, String, Array
 from System.Threading import CancellationTokenSource
 
 from CDP4Common.Helpers import NestedElementTreeGenerator
-from CDP4Common.EngineeringModelData import Iteration, EngineeringModel, Option, NestedElement, NestedParameter, ParameterValueSetBase, ParameterSwitchKind
-from CDP4Common.SiteDirectoryData import EngineeringModelSetup, SiteDirectory, DomainOfExpertise, Participant
+from CDP4Common.EngineeringModelData import (
+    Iteration,
+    EngineeringModel,
+    Option,
+    NestedElement,
+    NestedParameter,
+    ParameterValueSetBase,
+    ParameterSwitchKind,
+)
+from CDP4Common.SiteDirectoryData import (
+    EngineeringModelSetup,
+    SiteDirectory,
+    DomainOfExpertise,
+    Participant,
+)
 from CDP4Common.Types import ValueArray
 from CDP4Dal import Session, CDPMessageBus
 from CDP4Dal.DAL import Credentials
 from CDP4Dal.Operations import OperationContainer, ThingTransaction, TransactionContextResolver
 from CDP4ServicesDal import CdpServicesDal
 
+###################################################################################################
+#                                                                                                 #
+#                                            CLASSES                                              #
+#                                                                                                 #
+###################################################################################################
+
+
 class Cdp4SessionService:
     """Python around the Session to allow communication with the CDP4-COMET server"""
+
     def __init__(self):
         """
         Initializes a new instance of the Cdp4Session class
@@ -84,13 +149,14 @@ class Cdp4SessionService:
         target_iid = self.session.ActivePerson.Iid
 
         filtered_result = [
-            x for x in models
-            if any(p.Person.Iid == target_iid for p in x.Participant)
+            x for x in models if any(p.Person.Iid == target_iid for p in x.Participant)
         ]
 
         return filtered_result
 
-    def getAvailableDomains(self, engineeringModelSetup: EngineeringModelSetup) -> List[DomainOfExpertise]:
+    def getAvailableDomains(
+        self, engineeringModelSetup: EngineeringModelSetup
+    ) -> List[DomainOfExpertise]:
         """
         Gets the collection of DomainOfExpertise that the current user can access for a specific EngineeringModelSetup
         :param engineeringModelSetup: The EngineeringModelSetup that the current user is participating on
@@ -110,7 +176,11 @@ class Cdp4SessionService:
 
         return participant.Domain
 
-    def openActiveIteration(self, engineeringModelSetup: EngineeringModelSetup, selectedDomainOfExpertise: DomainOfExpertise) -> Iteration | str:
+    def openActiveIteration(
+        self,
+        engineeringModelSetup: EngineeringModelSetup,
+        selectedDomainOfExpertise: DomainOfExpertise,
+    ) -> Iteration | str:
         """
         Opens the active Iteration of the provided EngineeringModelSetup for the selected DomainOfExpertise
         :param engineeringModelSetup: The selected EngineeringModelSetup to open
@@ -143,7 +213,9 @@ class Cdp4SessionService:
         self.session.Read(iteration, selectedDomainOfExpertise).GetAwaiter().GetResult()
 
         openedIterationsKeys = self.session.OpenIterations.Keys
-        openedIteration = next((x for x in openedIterationsKeys if x.Iid == activeIterationSetup.IterationIid), None)
+        openedIteration = next(
+            (x for x in openedIterationsKeys if x.Iid == activeIterationSetup.IterationIid), None
+        )
 
         if isinstance(openedIteration, Iteration):
             return openedIteration
@@ -169,6 +241,13 @@ class Cdp4SessionService:
             return str(e)
 
 
+###################################################################################################
+#                                                                                                 #
+#                                           FUNCTIONS                                             #
+#                                                                                                 #
+###################################################################################################
+
+
 def computeProductTree(iteration: Iteration, option: Option) -> List[NestedElement]:
     """
     Computes a Product Tree based on the TopElement of the provided Iteration, for the specified option
@@ -189,7 +268,10 @@ def computeProductTree(iteration: Iteration, option: Option) -> List[NestedEleme
     productTreeGenerator = NestedElementTreeGenerator()
     return productTreeGenerator.GenerateNestedElements(option, iteration.TopElement)
 
-def getElementByParameterType(nestedElements: List[NestedElement], parameterTypeName: str) -> List[NestedElement]:
+
+def getElementByParameterType(
+    nestedElements: List[NestedElement], parameterTypeName: str
+) -> List[NestedElement]:
     """
     Filter the collection of NestedElement to only keep Element that contains a Parameter where the ParameterType Name
     matches the provides name
@@ -206,12 +288,18 @@ def getElementByParameterType(nestedElements: List[NestedElement], parameterType
     matchingNestedElements = []
 
     for nestedElement in nestedElements:
-        if any(p.AssociatedParameter.ParameterType.Name == parameterTypeName for p in nestedElement.NestedParameter):
+        if any(
+            p.AssociatedParameter.ParameterType.Name == parameterTypeName
+            for p in nestedElement.NestedParameter
+        ):
             matchingNestedElements.append(nestedElement)
 
     return matchingNestedElements
 
-def getElementByParameterTypeWhereAllValuesAreSet(nestedElements: List[NestedElement], parameterTypeName: str) -> List[NestedElement]:
+
+def getElementByParameterTypeWhereAllValuesAreSet(
+    nestedElements: List[NestedElement], parameterTypeName: str
+) -> List[NestedElement]:
     """
     Filter the collection of NestedElement to only keep Element that contains a Parameter where the ParameterType Name
     matches the provides name and if all ActualValue are set
@@ -224,13 +312,18 @@ def getElementByParameterTypeWhereAllValuesAreSet(nestedElements: List[NestedEle
     elemetsWithAllValues = []
 
     for nestedElement in filteredElements:
-        matchingParameters = [p for p in nestedElement.NestedParameter if p.AssociatedParameter.ParameterType.Name == parameterTypeName]
+        matchingParameters = [
+            p
+            for p in nestedElement.NestedParameter
+            if p.AssociatedParameter.ParameterType.Name == parameterTypeName
+        ]
         allDifferent = all(x.ActualValue != "-" for x in matchingParameters)
 
         if allDifferent:
             elemetsWithAllValues.append(nestedElement)
 
     return elemetsWithAllValues
+
 
 def prepareTransaction(iteration: Iteration) -> Tuple[Iteration, ThingTransaction]:
     """
@@ -245,7 +338,10 @@ def prepareTransaction(iteration: Iteration) -> Tuple[Iteration, ThingTransactio
     transaction = ThingTransaction(TransactionContextResolver.ResolveContext(clone), clone)
     return iteration, transaction
 
-def setValue(valueSet: ParameterValueSetBase, switchKind: ParameterSwitchKind, newValues: List[str]) -> ParameterValueSetBase:
+
+def setValue(
+    valueSet: ParameterValueSetBase, switchKind: ParameterSwitchKind, newValues: List[str]
+) -> ParameterValueSetBase:
     """
     Sets the value of a ParameterValueSetBase for the specified ParameterSwitchKind
     :param valueSet: The ParameterValueSetBase

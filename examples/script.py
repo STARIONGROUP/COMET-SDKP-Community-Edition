@@ -1,4 +1,14 @@
-from CDP4Adaptor import *
+"""
+Basic connection example for CDP4 Python Adaptor
+
+WARNNING:
+This script connects to a real backend and may modify data.
+Do not run in production environments.
+
+"""
+
+from comet_sdkp.CDP4Adaptor import *
+
 
 def main():
     session = Cdp4SessionService()
@@ -11,12 +21,12 @@ def main():
     participantModels = session.getParticipantModels()
 
     for model in participantModels:
-        print(f'Participant into: {model.Name}')
+        print(f"Participant into: {model.Name}")
 
         domains = session.getAvailableDomains(model)
 
         for domain in domains:
-            print(f'Available domain: {domain.Name} ({domain.ShortName})')
+            print(f"Available domain: {domain.Name} ({domain.ShortName})")
 
         iteration = session.openActiveIteration(model, domains[0])
 
@@ -32,12 +42,18 @@ def main():
             print(f"Generating ProductTree for option: {option.Name}")
 
             productTree = computeProductTree(iteration, option)
-            filteredByElectricCurrent = getElementByParameterTypeWhereAllValuesAreSet(productTree, parameterTypeName)
+            filteredByElectricCurrent = getElementByParameterTypeWhereAllValuesAreSet(
+                productTree, parameterTypeName
+            )
 
             sumValue = 0
 
             for element in sorted(filteredByElectricCurrent, key=lambda x: x.ShortName.count(".")):
-                matchingParameters = [p for p in element.NestedParameter if p.AssociatedParameter.ParameterType.Name == parameterTypeName]
+                matchingParameters = [
+                    p
+                    for p in element.NestedParameter
+                    if p.AssociatedParameter.ParameterType.Name == parameterTypeName
+                ]
                 for parameter in matchingParameters:
                     sumValue += int(parameter.ActualValue)
 
@@ -50,7 +66,9 @@ def main():
             stateIndex = 1
 
             for valueSet in parameter.ValueSet:
-                transaction.CreateOrUpdate(setValue(valueSet, ParameterSwitchKind.COMPUTED, [str(sumValue/stateIndex)]))
+                transaction.CreateOrUpdate(
+                    setValue(valueSet, ParameterSwitchKind.COMPUTED, [str(sumValue / stateIndex)])
+                )
                 stateIndex += 1
             writeResult = session.write(transaction)
 
@@ -58,6 +76,7 @@ def main():
                 print(writeResult)
             else:
                 print("Write operation successful")
+
 
 if __name__ == "__main__":
     main()
