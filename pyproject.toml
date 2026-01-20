@@ -14,19 +14,30 @@ authors = [{ name = "STARION GROUP" }]
 
 maintainers = [{ name = "COMET Community" }]
 
-keywords = ["sdk", "COMET", "sdkp"]
+keywords = ["sdk", "COMET", "sdkp", "CDP4", "python-sdk"]
 
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-dependencies = [ "pythonnet>=3.0.5" ]
+dependencies = [
+    "pythonnet>=3.0.5",
+]
 
 [project.optional-dependencies]
+
+# Testing dependencies
+test = [
+    "pytest>=9.0",
+    "pytest-cov>=6.0",
+    "pytest-mock>=3.14",
+]
 
 # Doc dependencies
 docs = [
@@ -36,14 +47,25 @@ docs = [
     "sphinx-autodoc-typehints>=2.0",
 ]
 
-# Development dependencies
-dev = ["pytest>=9.0", "black>=24.0", "isort>=5.13", "build>=1.0"]
+# Development dependencies (includes all test + formatting)
+dev = [
+    "pytest>=9.0",
+    "pytest-cov>=6.0",
+    "pytest-mock>=3.14",
+    "black>=24.0",
+    "isort>=5.13",
+    "mypy>=1.7",
+    "pylint>=3.0",
+    "build>=1.0",
+    "twine>=5.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition"
 Repository = "https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition"
 Issues = "https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/issues"
 Documentation = "https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition#readme"
+Changelog = "https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/releases"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
@@ -53,16 +75,141 @@ where = ["src"]
 exclude = ["tests*"]
 
 [tool.setuptools.package-data]
-"comet_sdkp" = ["libs/*"]
+"comet_sdkp" = [
+    "libs/*",
+    "py.typed",
+]
+
+###################################################################################################
+#                                    PYTEST CONFIGURATION                                        #
+###################################################################################################
 
 [tool.pytest.ini_options]
 minversion = "9.0.2"
-addopts = "-ra -q"
+addopts = [
+    "-ra",
+    "-q",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=comet_sdkp",
+    "--cov-report=term-missing",
+    "--cov-report=html:coverage_html",
+    "--cov-branch",
+    "--tb=short",
+]
 testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Custom pytest markers
+markers = [
+    "unit: mark test as a unit test (no external dependencies)",
+    "integration: mark test as an integration test (may require external resources)",
+    "smoke: mark test as a smoke test (basic functionality checks)",
+    "slow: mark test as slow (takes longer to execute)",
+    "skip_ci: mark test to skip in CI/CD pipelines",
+]
+
+###################################################################################################
+#                                   CODE QUALITY TOOLS                                           #
+###################################################################################################
 
 [tool.black]
 line-length = 100
 target-version = ["py312"]
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | coverage_html
+)/
+'''
 
 [tool.isort]
 profile = "black"
+line_length = 100
+target_version = "py312"
+skip_gitignore = true
+known_first_party = ["comet_sdkp"]
+known_third_party = ["pythonnet"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = false
+warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+no_implicit_optional = true
+warn_no_return = true
+strict_optional = false
+ignore_missing_imports = false
+exclude = [
+    "^tests/",
+    "^build/",
+    "^dist/",
+]
+
+# Ignore missing type stubs for .NET libraries
+[[tool.mypy.overrides]]
+module = [
+    "clr",
+    "System",
+    "System.*",
+    "System.Collections.*",
+    "System.Threading.*",
+    "CDP4.*",
+    "CDP4Common.*",
+    "CDP4Common.Helpers",
+    "CDP4Common.EngineeringModelData",
+    "CDP4Common.SiteDirectoryData",
+    "CDP4Common.Types",
+    "CDP4Dal",
+    "CDP4Dal.DAL",
+    "CDP4Dal.Operations",
+    "CDP4ServicesDal",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[tool.pylint.messages_control]
+disable = [
+    "C0330",  # wrong hanging indentation before block
+    "C0326",  # bad whitespace
+    "R0913",  # too-many-arguments
+    "R0914",  # too-many-locals
+    "W0212",  # protected-access
+]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint.design]
+max-attributes = 10
+max-locals = 20
+max-arguments = 10
+
+###################################################################################################
+#                                  BUILD & DISTRIBUTION                                          #
+###################################################################################################
+
+[tool.build]
+# Ensure package metadata is included
+include = [
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+]

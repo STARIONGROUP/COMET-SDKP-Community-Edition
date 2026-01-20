@@ -1,0 +1,132 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\r.moyavazquez\OneDrive - Starion Group\Documents\COMET-SDKP-Community-Edition\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\r.moyavazquez\OneDrive - Starion Group\Documents\COMET-SDKP-Community-Edition
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: cov-7.0.0
+collecting ... collected 92 items
+
+tests/integration/test_CDP4Adaptor_integration.py::TestCdp4SessionIntegration::test_session_initialization_and_properties PASSED [  1%]
+tests/integration/test_CDP4Adaptor_integration.py::TestCdp4SessionIntegration::test_session_open_close_cycle PASSED [  2%]
+tests/integration/test_CDP4Adaptor_integration.py::TestCdp4SessionIntegration::test_retrieve_participant_models_workflow PASSED [  3%]
+tests/integration/test_CDP4Adaptor_integration.py::TestCdp4SessionIntegration::test_retrieve_models_user_not_participant PASSED [  4%]
+tests/integration/test_CDP4Adaptor_integration.py::TestCdp4SessionIntegration::test_get_domains_for_model_workflow PASSED [  5%]
+tests/integration/test_CDP4Adaptor_integration.py::TestCdp4SessionIntegration::test_get_domains_when_user_not_participant PASSED [  6%]
+tests/integration/test_CDP4Adaptor_integration.py::TestProductTreeIntegration::test_compute_product_tree_with_hierarchy PASSED [  7%]
+tests/integration/test_CDP4Adaptor_integration.py::TestProductTreeIntegration::test_compute_product_tree_single_element PASSED [  8%]
+tests/integration/test_CDP4Adaptor_integration.py::TestProductTreeIntegration::test_compute_product_tree_empty PASSED [  9%]
+tests/integration/test_CDP4Adaptor_integration.py::TestProductTreeIntegration::test_compute_product_tree_invalid_inputs PASSED [ 10%]
+tests/integration/test_CDP4Adaptor_integration.py::TestProductTreeIntegration::test_compute_product_tree_no_top_element PASSED [ 11%]
+tests/integration/test_CDP4Adaptor_integration.py::TestParameterFilteringIntegration::test_filter_elements_by_parameter_type PASSED [ 13%]
+tests/integration/test_CDP4Adaptor_integration.py::TestParameterFilteringIntegration::test_filter_elements_by_different_parameter_type PASSED [ 14%]
+tests/integration/test_CDP4Adaptor_integration.py::TestParameterFilteringIntegration::test_filter_elements_no_matches PASSED [ 15%]
+tests/integration/test_CDP4Adaptor_integration.py::TestParameterFilteringIntegration::test_filter_with_all_values_set PASSED [ 16%]
+tests/integration/test_CDP4Adaptor_integration.py::TestParameterFilteringIntegration::test_filter_with_unset_values PASSED [ 17%]
+tests/integration/test_CDP4Adaptor_integration.py::TestParameterFilteringIntegration::test_filter_with_multiple_unset_values PASSED [ 18%]
+tests/integration/test_CDP4Adaptor_integration.py::TestTransactionIntegration::test_prepare_transaction_workflow PASSED [ 19%]
+tests/integration/test_CDP4Adaptor_integration.py::TestTransactionIntegration::test_prepare_transaction_with_none PASSED [ 20%]
+tests/integration/test_CDP4Adaptor_integration.py::TestTransactionIntegration::test_set_value_workflow_manual PASSED [ 21%]
+tests/integration/test_CDP4Adaptor_integration.py::TestTransactionIntegration::test_set_value_workflow_computed PASSED [ 22%]
+tests/integration/test_CDP4Adaptor_integration.py::TestTransactionIntegration::test_set_value_workflow_reference PASSED [ 23%]
+tests/integration/test_CDP4Adaptor_integration.py::TestTransactionIntegration::test_set_value_with_none_value_set PASSED [ 25%]
+tests/integration/test_CDP4Adaptor_integration.py::TestTransactionIntegration::test_set_value_with_none_values PASSED [ 26%]
+tests/integration/test_CDP4Adaptor_integration.py::TestTransactionIntegration::test_set_value_with_empty_values PASSED [ 27%]
+tests/integration/test_CDP4Adaptor_integration.py::TestTransactionIntegration::test_set_value_with_invalid_switch_kind PASSED [ 28%]
+tests/integration/test_CDP4Adaptor_integration.py::TestEndToEndWorkflows::test_complete_product_tree_and_filtering_workflow PASSED [ 29%]
+tests/integration/test_CDP4Adaptor_integration.py::TestEndToEndWorkflows::test_transaction_and_write_workflow PASSED [ 30%]
+tests/integration/test_CDP4Adaptor_integration.py::TestEndToEndWorkflows::test_complete_session_models_domains_workflow PASSED [ 31%]
+tests/integration/test_CDP4Adaptor_integration.py::TestRealCDP4Integration::test_real_session_connection SKIPPED [ 32%]
+tests/integration/test_CDP4Adaptor_integration.py::TestRealCDP4Integration::test_real_get_participant_models SKIPPED [ 33%]
+tests/integration/test_CDP4Adaptor_integration.py::TestRealCDP4Integration::test_real_open_iteration SKIPPED [ 34%]
+tests/smoke/test_imports.py::test_sdk_imports PASSED                     [ 35%]
+tests/smoke/test_imports.py::test_client_import PASSED                   [ 36%]
+tests/unit/test_CDP4Adaptor.py::test_session_instantiation PASSED        [ 38%]
+tests/unit/test_CDP4Adaptor.py::test_session_has_expected_methods PASSED [ 39%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceInit::test_init_creates_instance PASSED [ 40%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceInit::test_init_sets_messageBus PASSED [ 41%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceInit::test_init_sets_dal PASSED [ 42%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_with_valid_parameters SKIPPED [ 43%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_when_session_already_open PASSED [ 44%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_without_server_uri PASSED [ 45%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_without_username PASSED [ 46%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_without_password PASSED [ 47%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_with_none_uri PASSED [ 48%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_with_none_username PASSED [ 50%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_with_none_password PASSED [ 51%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_with_exception FAILED [ 52%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceClose::test_close_when_session_open PASSED [ 53%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceClose::test_close_when_session_not_open PASSED [ 54%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceClose::test_close_with_exception PASSED [ 55%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceGetParticipantModels::test_get_participant_models_when_session_closed PASSED [ 56%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceGetParticipantModels::test_get_participant_models_with_valid_session PASSED [ 57%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceGetParticipantModels::test_get_participant_models_with_no_models PASSED [ 58%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceGetParticipantModels::test_get_participant_models_with_none_session PASSED [ 59%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceGetAvailableDomains::test_get_available_domains_when_session_closed PASSED [ 60%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceGetAvailableDomains::test_get_available_domains_without_setup PASSED [ 61%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceGetAvailableDomains::test_get_available_domains_with_valid_setup PASSED [ 63%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceGetAvailableDomains::test_get_available_domains_when_participant_not_found PASSED [ 64%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceGetAvailableDomains::test_get_available_domains_with_no_domains PASSED [ 65%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpenActiveIteration::test_open_active_iteration_without_setup PASSED [ 66%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpenActiveIteration::test_open_active_iteration_without_domain PASSED [ 67%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpenActiveIteration::test_open_active_iteration_when_session_closed PASSED [ 68%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpenActiveIteration::test_open_active_iteration_no_active_iteration PASSED [ 69%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpenActiveIteration::test_open_active_iteration_with_valid_parameters PASSED [ 70%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceWrite::test_write_when_session_closed PASSED [ 71%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceWrite::test_write_without_transaction PASSED [ 72%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceWrite::test_write_with_valid_transaction PASSED [ 73%]
+tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceWrite::test_write_with_exception PASSED [ 75%]
+tests/unit/test_CDP4Adaptor.py::TestComputeProductTree::test_compute_product_tree_without_option PASSED [ 76%]
+tests/unit/test_CDP4Adaptor.py::TestComputeProductTree::test_compute_product_tree_without_iteration PASSED [ 77%]
+tests/unit/test_CDP4Adaptor.py::TestComputeProductTree::test_compute_product_tree_without_top_element PASSED [ 78%]
+tests/unit/test_CDP4Adaptor.py::TestComputeProductTree::test_compute_product_tree_with_valid_parameters PASSED [ 79%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterType::test_get_element_without_nested_elements PASSED [ 80%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterType::test_get_element_without_parameter_type_name PASSED [ 81%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterType::test_get_element_with_empty_list PASSED [ 82%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterType::test_get_element_with_matching_parameters PASSED [ 83%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterType::test_get_element_with_no_matches PASSED [ 84%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterType::test_get_element_with_empty_nested_parameters PASSED [ 85%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterTypeWhereAllValuesAreSet::test_get_element_with_all_values_set PASSED [ 86%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterTypeWhereAllValuesAreSet::test_get_element_with_missing_values PASSED [ 88%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterTypeWhereAllValuesAreSet::test_get_element_with_multiple_elements PASSED [ 89%]
+tests/unit/test_CDP4Adaptor.py::TestGetElementByParameterTypeWhereAllValuesAreSet::test_get_element_without_nested_elements PASSED [ 90%]
+tests/unit/test_CDP4Adaptor.py::TestPrepareTransaction::test_prepare_transaction_without_iteration PASSED [ 91%]
+tests/unit/test_CDP4Adaptor.py::TestPrepareTransaction::test_prepare_transaction_with_valid_iteration PASSED [ 92%]
+tests/unit/test_CDP4Adaptor.py::TestSetValue::test_set_value_without_value_set PASSED [ 93%]
+tests/unit/test_CDP4Adaptor.py::TestSetValue::test_set_value_without_values PASSED [ 94%]
+tests/unit/test_CDP4Adaptor.py::TestSetValue::test_set_value_with_empty_values PASSED [ 95%]
+tests/unit/test_CDP4Adaptor.py::TestSetValue::test_set_value_computed_switch_kind PASSED [ 96%]
+tests/unit/test_CDP4Adaptor.py::TestSetValue::test_set_value_manual_switch_kind PASSED [ 97%]
+tests/unit/test_CDP4Adaptor.py::TestSetValue::test_set_value_reference_switch_kind PASSED [ 98%]
+tests/unit/test_CDP4Adaptor.py::TestSetValue::test_set_value_invalid_switch_kind PASSED [100%]
+
+================================== FAILURES ===================================
+_____________ TestCdp4SessionServiceOpen.test_open_with_exception _____________
+
+self = <tests.unit.test_CDP4Adaptor.TestCdp4SessionServiceOpen object at 0x000002EAB1664C20>
+
+    def test_open_with_exception(self):
+        """Test opening with connection exception"""
+        service = Cdp4SessionService()
+    
+        # When connection fails, the open method returns an error string
+        result = service.open("http://invalid", "user", "pass")
+    
+        # Verify error is returned as string or None
+        assert isinstance(result, (str, type(None)))
+>       assert service.isSessionOpen is False
+E       assert True is False
+E        +  where True = <comet_sdkp.CDP4Adaptor.Cdp4SessionService object at 0x000002EAB17684A0>.isSessionOpen
+
+tests\unit\test_CDP4Adaptor.py:173: AssertionError
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.12.10-final-0 _______________
+
+Name                            Stmts   Miss  Cover   Missing
+-------------------------------------------------------------
+src\comet_sdkp\CDP4Adaptor.py     283     43    85%   55-57, 144-146, 193-197, 255-257, 299-301, 361-366, 454, 505-507, 533-535, 551-553, 580-581, 597-599, 629-631, 687-689
+src\comet_sdkp\__init__.py          0      0   100%
+-------------------------------------------------------------
+TOTAL                             283     43    85%
+=========================== short test summary info ===========================
+FAILED tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_with_exception
+=================== 1 failed, 87 passed, 4 skipped in 0.53s ===================
