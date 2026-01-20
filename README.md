@@ -1,4 +1,3 @@
-<!-- filepath: c:\Users\r.moyavazquez\OneDrive - Starion Group\Documents\COMET-SDKP-Community-Edition\README.md -->
 ![CDP4-COMET-Logo](https://raw.githubusercontent.com/STARIONGROUP/COMET-WebServices-Community-Edition/master/COMET-Community-Edition.jpg)
 
 # COMET SDKP Community Edition
