@@ -16,13 +16,26 @@ This guide will help you get started with the COMET SDKP Community Edition.
 mkdir my_cdp4_project
 cd my_cdp4_project
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Activate virtual environment
+# On Windows (cmd.exe):
+venv\Scripts\activate
+
+# On Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+
+# On macOS / Linux (POSIX shells):
+source venv/bin/activate
 ```
 
 ### Step 2: Install COMET SDKP
 
 ```bash
+# Install the published package
 pip install comet-sdkp
+
+# For development (from source)
+# pip install -e ".[dev]"
 ```
 
 ### Step 3: Write Your First Script
@@ -110,8 +123,6 @@ Retrieving domains for 'Test Model'...
 
 ## Working with Iterations
 
-To open and work with iterations:
-
 ```python
 from comet_sdkp.CDP4Adaptor import (
     Cdp4SessionService,
@@ -120,22 +131,27 @@ from comet_sdkp.CDP4Adaptor import (
 
 service = Cdp4SessionService()
 
-if service.open("http://localhost:5000", "admin", "password"):
+# Open session and check result explicitly
+result = service.open("http://localhost:5000", "admin", "password")
+if result is not None:
+    print(f"Connection failed: {result}")
+else:
     models = service.getParticipantModels()
-    
     if models:
         model = models[0]
         domains = service.getAvailableDomains(model)
-        
         if domains:
             # Open the active iteration
             iteration = service.openActiveIteration(model, domains[0])
             
-            if iteration:
+            # openActiveIteration returns an Iteration or an error string
+            if isinstance(iteration, str):
+                print(f"Failed to open iteration: {iteration}")
+            else:
                 print(f"Opened iteration: {iteration.Iid}")
                 
                 # Compute product tree
-                if iteration.Option:
+                if getattr(iteration, "Option", None):
                     option = iteration.Option[0]
                     tree = computeProductTree(iteration, option)
                     

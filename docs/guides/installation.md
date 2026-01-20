@@ -15,7 +15,9 @@ This guide will help you install the COMET SDKP Community Edition.
 
 ### Other Requirements
 - **pythonnet** >= 3.0.5 (automatically installed)
-- **.NET Framework** (for pythonnet integration)
+- **.NET runtime** (for pythonnet integration).  
+  - On Windows ensure either .NET Framework (4.7.2+) or .NET 6+ runtime is installed.
+  - On macOS/Linux install the appropriate .NET runtime for pythonnet usage.
 - Minimum 512MB RAM
 - 100MB disk space
 - Git (only needed for source installation)
@@ -36,9 +38,13 @@ This is the **preferred and easiest installation method**. Use this if you have 
 python -m venv venv
 
 # Step 2: Activate virtual environment
-# On Windows:
+# On Windows (cmd.exe)
 venv\Scripts\activate
-# On macOS/Linux:
+
+# On Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# On POSIX shells (macOS / Linux)
 source venv/bin/activate
 
 # Step 3: Install from wheel file
@@ -69,9 +75,13 @@ cd COMET-SDKP-Community-Edition
 python -m venv venv
 
 # Step 3: Activate virtual environment
-# On Windows:
+# On Windows (cmd.exe)
 venv\Scripts\activate
-# On macOS/Linux:
+
+# On Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# On POSIX shells (macOS / Linux)
 source venv/bin/activate
 
 # Step 4: Install the SDK
@@ -96,9 +106,13 @@ cd COMET-SDKP-Community-Edition
 python -m venv venv
 
 # Step 3: Activate virtual environment
-# On Windows:
+# On Windows (cmd.exe)
 venv\Scripts\activate
-# On macOS/Linux:
+
+# On Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# On POSIX shells (macOS / Linux)
 source venv/bin/activate
 
 # Step 4: Install in development mode with all tools
@@ -201,8 +215,12 @@ It's recommended to use a virtual environment to avoid conflicts with other Pyth
 python -m venv venv
 
 # Activate it
-# Windows:
+# Windows (cmd.exe):
 venv\Scripts\activate
+
+# Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+
 # macOS/Linux:
 source venv/bin/activate
 
@@ -218,13 +236,16 @@ deactivate
 
 ### Error: "No module named 'clr'"
 
-This means pythonnet is not properly installed.
+This means pythonnet is not properly installed or the .NET runtime is missing.
 
 **Solution:**
 ```bash
 # Make sure you're in the virtual environment
 # Then reinstall pythonnet
 pip install --force-reinstall pythonnet>=3.0.5
+
+# On Windows ensure a compatible .NET runtime is installed:
+# - .NET Framework 4.7.2+ or .NET 6+ runtime
 ```
 
 ### Error: "No module named 'comet_sdkp'"

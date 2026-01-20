@@ -103,8 +103,8 @@ Get domains of expertise available for a model.
 **Returns:**
 - List of domain objects
 
-**Raises:**
-- `ValueError` if setup parameter is missing
+**Raises:**  
+- `InvalidParametersException` if setup parameter is missing
 
 **Example:**
 ```python
@@ -128,7 +128,7 @@ Open the active iteration for a model and domain.
 - Error message string if failed
 
 **Raises:**
-- `ValueError` if setup or domain not provided
+- `InvalidParametersException` if setup or domain not provided
 
 **Example:**
 ```python
@@ -198,8 +198,8 @@ def computeProductTree(iteration: Iteration, option: Option) -> list[NestedEleme
 **Returns:**
 - List of NestedElement objects representing the product hierarchy
 
-**Raises:**
-- `ValueError` if iteration or option not provided
+**Raises:**  
+- `InvalidParametersException` if iteration or option not provided
 
 **Example:**
 ```python
@@ -229,7 +229,7 @@ def getElementByParameterType(elements: list, parameterTypeName: str) -> list
 - List of elements containing the specified parameter type
 
 **Raises:**
-- `ValueError` if elements or parameter type name not provided
+- `InvalidParametersException` if elements or parameter type name not provided
 
 **Example:**
 ```python
@@ -287,13 +287,13 @@ def prepareTransaction(iteration: Iteration) -> tuple[Iteration, ThingTransactio
 - Tuple of (cloned iteration, ThingTransaction)
 
 **Raises:**
-- `ValueError` if iteration not provided
+- `InvalidParametersException` if iteration not provided
 
 **Example:**
 ```python
 from comet_sdkp.CDP4Adaptor import prepareTransaction
 
-iteration, transaction = prepareTransaction(iteration)
+cloned_iteration, transaction = prepareTransaction(iteration)
 
 # Make modifications...
 # Then write changes
@@ -329,18 +329,12 @@ def setValue(
 from comet_sdkp.CDP4Adaptor import setValue
 from CDP4Common.EngineeringModelData import ParameterSwitchKind
 
-# Set manual values
+# Correct usage: pass a ParameterValueSet (e.g. first ValueSet of a parameter)
+value_set = param.ValueSet[0]
 setValue(
     value_set,
     ParameterSwitchKind.MANUAL,
     ["100", "200", "300"]
-)
-
-# Or set computed values
-setValue(
-    value_set,
-    ParameterSwitchKind.COMPUTED,
-    ["=Mass*Density"]
 )
 ```
 
@@ -362,7 +356,8 @@ from CDP4Common.EngineeringModelData import ParameterSwitchKind
 service = Cdp4SessionService()
 
 # Connect to server
-if service.open("http://localhost:5000", "admin", "password"):
+result = service.open("http://localhost:5000", "admin", "password")
+if result is not None:
     print("✗ Connection failed")
     exit(1)
 
@@ -401,13 +396,14 @@ if iteration.Option:
     print(f"✓ Found {len(mass_elements)} elements with Mass")
     
     # Prepare transaction for modifications
-    iteration, transaction = prepareTransaction(iteration)
+    cloned_iteration, transaction = prepareTransaction(iteration)
     
     # Modify values
     for element in mass_elements:
-        for param in element.NestedParameter:
+        for param in (element.NestedParameter or []):
             if param.AssociatedParameter.ParameterType.Name == "Mass":
-                setValue(param, ParameterSwitchKind.MANUAL, ["50.0"])
+                for vs in (param.ValueSet or []):
+                    setValue(vs, ParameterSwitchKind.MANUAL, ["50.0"])
     
     # Write changes
     result = service.write(transaction)
@@ -422,7 +418,7 @@ if iteration.Option:
 All functions may raise exceptions. Always include error handling:
 
 ```python
-from comet_sdkp.CDP4Adaptor import Cdp4SessionService
+from comet_sdkp.CDP4Adaptor import Cdp4SessionService, InvalidParametersException
 
 service = Cdp4SessionService()
 
@@ -435,7 +431,7 @@ try:
     
     models = service.getParticipantModels()
     
-except ValueError as e:
+except InvalidParametersException as e:
     print(f"Parameter error: {e}")
     exit(1)
 except Exception as e:

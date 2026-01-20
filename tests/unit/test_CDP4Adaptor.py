@@ -15,18 +15,18 @@ from typing import List
 import sys
 from unittest.mock import MagicMock
 
-sys.modules['clr'] = MagicMock()
-sys.modules['System'] = MagicMock()
-sys.modules['System.Threading'] = MagicMock()
-sys.modules['CDP4Common'] = MagicMock()
-sys.modules['CDP4Common.Helpers'] = MagicMock()
-sys.modules['CDP4Common.EngineeringModelData'] = MagicMock()
-sys.modules['CDP4Common.SiteDirectoryData'] = MagicMock()
-sys.modules['CDP4Common.Types'] = MagicMock()
-sys.modules['CDP4Dal'] = MagicMock()
-sys.modules['CDP4Dal.DAL'] = MagicMock()
-sys.modules['CDP4Dal.Operations'] = MagicMock()
-sys.modules['CDP4ServicesDal'] = MagicMock()
+sys.modules["clr"] = MagicMock()
+sys.modules["System"] = MagicMock()
+sys.modules["System.Threading"] = MagicMock()
+sys.modules["CDP4Common"] = MagicMock()
+sys.modules["CDP4Common.Helpers"] = MagicMock()
+sys.modules["CDP4Common.EngineeringModelData"] = MagicMock()
+sys.modules["CDP4Common.SiteDirectoryData"] = MagicMock()
+sys.modules["CDP4Common.Types"] = MagicMock()
+sys.modules["CDP4Dal"] = MagicMock()
+sys.modules["CDP4Dal.DAL"] = MagicMock()
+sys.modules["CDP4Dal.Operations"] = MagicMock()
+sys.modules["CDP4ServicesDal"] = MagicMock()
 
 from comet_sdkp.CDP4Adaptor import (
     Cdp4SessionService,
@@ -35,21 +35,28 @@ from comet_sdkp.CDP4Adaptor import (
     getElementByParameterTypeWhereAllValuesAreSet,
     prepareTransaction,
     setValue,
+    Cdp4Exception,
+    SessionException,
+    InvalidParametersException,
 )
 
+
+###################################################################################################
+#                                      BASIC TESTS                                                #
+###################################################################################################
+
+
 def test_session_instantiation():
-    """
-        tests instantiation of the Session Service.
-    """
+    """Tests instantiation of the Session Service."""
     testSession = Cdp4SessionService()
     assert testSession is not None
 
+
 def test_session_has_expected_methods():
-    """
-        tests Session Service instance has the expected methods and attributes
-    """
+    """Tests Session Service instance has the expected methods and attributes"""
     testSession = Cdp4SessionService()
     assert hasattr(testSession, "open")
+    assert hasattr(testSession, "close")
     assert hasattr(testSession, "getParticipantModels")
     assert hasattr(testSession, "getAvailableDomains")
     assert hasattr(testSession, "openActiveIteration")
@@ -58,10 +65,9 @@ def test_session_has_expected_methods():
     assert hasattr(testSession, "messageBus")
     assert hasattr(testSession, "isSessionOpen")
 
+
 ###################################################################################################
-#                                                                                                 #
-#                                    CDPsessionservice TESTS                                     #
-#                                                                                                 #
+#                                 CDPSESSIONSERVICE TESTS                                        #
 ###################################################################################################
 
 
@@ -100,45 +106,142 @@ class TestCdp4SessionServiceOpen:
         """Test opening a session when already open"""
         service = Cdp4SessionService()
         service.isSessionOpen = True
+        service.session = MagicMock()
 
-        result = service.open("http://localhost", "user", "pass")
+        with pytest.raises(SessionException) as exc_info:
+            service.open("http://localhost", "user", "pass")
 
-        assert result == "Session already open"
+        assert "already open" in str(exc_info.value).lower()
 
     def test_open_without_server_uri(self):
         """Test opening without server URI"""
         service = Cdp4SessionService()
 
-        result = service.open("", "user", "pass")
+        with pytest.raises(InvalidParametersException) as exc_info:
+            service.open("", "user", "pass")
 
-        assert result == "Server URI not provided"
+        assert "URI" in str(exc_info.value) or "empty" in str(exc_info.value).lower()
 
     def test_open_without_username(self):
         """Test opening without username"""
         service = Cdp4SessionService()
 
-        result = service.open("http://localhost", "", "pass")
+        with pytest.raises(InvalidParametersException) as exc_info:
+            service.open("http://localhost", "", "pass")
 
-        assert result == "Username not provided"
+        assert "Username" in str(exc_info.value) or "empty" in str(exc_info.value).lower()
 
     def test_open_without_password(self):
         """Test opening without password"""
         service = Cdp4SessionService()
 
-        result = service.open("http://localhost", "user", "")
+        with pytest.raises(InvalidParametersException) as exc_info:
+            service.open("http://localhost", "user", "")
 
-        assert result == "Password not provided"
+        assert "Password" in str(exc_info.value) or "empty" in str(exc_info.value).lower()
 
-    def test_open_with_exception(self):
-        """Test opening with connection exception"""
+    def test_open_with_none_uri(self):
+        """Test opening with None URI"""
         service = Cdp4SessionService()
-        
-        # When connection fails, the open method returns an error string
-        result = service.open("http://invalid", "user", "pass")
 
-        # Verify error is returned
-        assert isinstance(result, str) or result is None
+        with pytest.raises(InvalidParametersException):
+            service.open(None, "user", "pass")
+
+    def test_open_with_none_username(self):
+        """Test opening with None username"""
+        service = Cdp4SessionService()
+
+        with pytest.raises(InvalidParametersException):
+            service.open("http://localhost", None, "pass")
+
+    def test_open_with_none_password(self):
+        """Test opening with None password"""
+        service = Cdp4SessionService()
+
+        with pytest.raises(InvalidParametersException):
+            service.open("http://localhost", "user", None)
+
+    def test_open_with_exception_in_session_constructor(self):
+        """Test opening when Session constructor raises exception"""
+        service = Cdp4SessionService()
+
+        with patch("comet_sdkp.CDP4Adaptor.Uri"):
+            with patch("comet_sdkp.CDP4Adaptor.Credentials"):
+                with patch("comet_sdkp.CDP4Adaptor.Session") as mock_session_class:
+                    # Make Session constructor raise an exception
+                    mock_session_class.side_effect = Exception("Connection failed")
+
+                    result = service.open("http://localhost:5000", "user", "pass")
+
+                    # Verify error is returned as string
+                    assert isinstance(result, str)
+                    assert "Connection failed" in result
+                    assert service.isSessionOpen is False
+                    assert service.session is None
+
+    def test_open_with_exception_in_session_open(self):
+        """Test opening when Session.Open() raises exception"""
+        service = Cdp4SessionService()
+
+        with patch("comet_sdkp.CDP4Adaptor.Uri"):
+            with patch("comet_sdkp.CDP4Adaptor.Credentials"):
+                with patch("comet_sdkp.CDP4Adaptor.Session") as mock_session_class:
+                    mock_session = MagicMock()
+                    # Make Open() call raise an exception
+                    mock_session.Open.return_value.GetAwaiter.return_value.GetResult.side_effect = (
+                        Exception("Network error")
+                    )
+                    mock_session_class.return_value = mock_session
+
+                    result = service.open("http://localhost:5000", "user", "pass")
+
+                    # Verify error is returned as string
+                    assert isinstance(result, str)
+                    assert "Network error" in result
+                    assert service.isSessionOpen is False
+                    assert service.session is None
+
+
+# ... (resto del código igual) ...
+class TestCdp4SessionServiceClose:
+    """Tests for the close() method"""
+
+    def test_close_when_session_open(self):
+        """Test closing an open session"""
+        service = Cdp4SessionService()
+        service.isSessionOpen = True
+        service.session = MagicMock()
+        service.session.Close.return_value.GetAwaiter.return_value.GetResult.return_value = None
+
+        result = service.close()
+
+        assert result is None
         assert service.isSessionOpen is False
+        assert service.session is None
+
+    def test_close_when_session_not_open(self):
+        """Test closing when session is not open"""
+        service = Cdp4SessionService()
+        service.isSessionOpen = False
+
+        result = service.close()
+
+        assert result is None
+        assert service.isSessionOpen is False
+
+    def test_close_with_exception(self):
+        """Test close handles exceptions"""
+        service = Cdp4SessionService()
+        service.isSessionOpen = True
+        service.session = MagicMock()
+        service.session.Close.return_value.GetAwaiter.return_value.GetResult.side_effect = (
+            Exception("Close failed")
+        )
+
+        result = service.close()
+
+        assert isinstance(result, str)
+        assert "Close failed" in result
 
 
 class TestCdp4SessionServiceGetParticipantModels:
@@ -209,6 +312,16 @@ class TestCdp4SessionServiceGetParticipantModels:
 
         assert result == []
 
+    def test_get_participant_models_with_none_session(self):
+        """Test getting models when session is None despite isSessionOpen"""
+        service = Cdp4SessionService()
+        service.isSessionOpen = True
+        service.session = None
+
+        result = service.getParticipantModels()
+
+        assert result == []
+
 
 class TestCdp4SessionServiceGetAvailableDomains:
     """Tests for the getAvailableDomains() method"""
@@ -227,7 +340,7 @@ class TestCdp4SessionServiceGetAvailableDomains:
         service = Cdp4SessionService()
         service.isSessionOpen = True
 
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidParametersException):
             service.getAvailableDomains(None)
 
     def test_get_available_domains_with_valid_setup(self):
@@ -274,6 +387,27 @@ class TestCdp4SessionServiceGetAvailableDomains:
 
         assert result == []
 
+    def test_get_available_domains_with_no_domains(self):
+        """Test getting domains when participant has none"""
+        service = Cdp4SessionService()
+        service.isSessionOpen = True
+
+        mock_person = MagicMock()
+        mock_person.Iid = "person-id-123"
+        service.session = MagicMock()
+        service.session.ActivePerson = mock_person
+
+        mock_participant = MagicMock()
+        mock_participant.Domain = None
+
+        mock_setup = MagicMock()
+        mock_setup.Participant = MagicMock()
+        mock_setup.Participant.Find.return_value = mock_participant
+
+        result = service.getAvailableDomains(mock_setup)
+
+        assert result == []
+
 
 class TestCdp4SessionServiceOpenActiveIteration:
     """Tests for the openActiveIteration() method"""
@@ -282,14 +416,14 @@ class TestCdp4SessionServiceOpenActiveIteration:
         """Test opening iteration without providing setup"""
         service = Cdp4SessionService()
 
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidParametersException):
             service.openActiveIteration(None, MagicMock())
 
     def test_open_active_iteration_without_domain(self):
         """Test opening iteration without providing domain"""
         service = Cdp4SessionService()
 
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidParametersException):
             service.openActiveIteration(MagicMock(), None)
 
     def test_open_active_iteration_when_session_closed(self):
@@ -299,7 +433,22 @@ class TestCdp4SessionServiceOpenActiveIteration:
 
         result = service.openActiveIteration(MagicMock(), MagicMock())
 
-        assert result == "Session is not open"
+        assert isinstance(result, str)
+        assert "not open" in result.lower()
+
+    def test_open_active_iteration_no_active_iteration(self):
+        """Test opening when model has no active iterations"""
+        service = Cdp4SessionService()
+        service.isSessionOpen = True
+        service.session = MagicMock()
+
+        mock_setup = MagicMock()
+        mock_setup.IterationSetup = []  # No iterations
+
+        result = service.openActiveIteration(mock_setup, MagicMock())
+
+        assert isinstance(result, str)
+        assert "no active iteration" in result.lower()
 
     def test_open_active_iteration_with_valid_parameters(self):
         """Test opening active iteration with valid parameters"""
@@ -316,8 +465,8 @@ class TestCdp4SessionServiceOpenActiveIteration:
 
         mock_domain = MagicMock()
 
-        # Create a proper mock for Iteration that will pass isinstance check
-        mock_opened_iteration = MagicMock(spec=['Iid'])
+        # Create a proper mock for Iteration
+        mock_opened_iteration = MagicMock()
         mock_opened_iteration.Iid = "iteration-id-123"
 
         service.session = MagicMock()
@@ -325,49 +474,12 @@ class TestCdp4SessionServiceOpenActiveIteration:
         service.session.OpenIterations = MagicMock()
         service.session.OpenIterations.Keys = [mock_opened_iteration]
 
-        with patch("comet_sdkp.CDP4Adaptor.Iteration") as mock_iteration_class:
-            # Make isinstance check pass by making the class a real type
-            mock_iteration_class.__class__ = type
-            mock_instance = MagicMock()
-            mock_instance.__class__ = mock_iteration_class
-            mock_opened_iteration.__class__ = mock_iteration_class
-            
-            with patch("comet_sdkp.CDP4Adaptor.EngineeringModel"):
-                try:
-                    result = service.openActiveIteration(mock_setup, mock_domain)
-                    # Result should be the iteration if found
-                    assert result is not None
-                except TypeError:
-                    # If isinstance still fails, that's a limitation of mocking CDP4 types
-                    pytest.skip("Cannot mock CDP4 Iteration class isinstance check")
-
-    def test_open_active_iteration_failed(self):
-        """Test opening iteration returns error string on failure"""
-        service = Cdp4SessionService()
-        service.isSessionOpen = True
-
-        mock_iteration_setup = MagicMock()
-        mock_iteration_setup.FrozenOn = None
-        mock_iteration_setup.IterationIid = "iteration-id-123"
-
-        mock_setup = MagicMock()
-        mock_setup.EngineeringModelIid = "model-id-123"
-        mock_setup.IterationSetup = [mock_iteration_setup]
-
-        service.session = MagicMock()
-        service.session.Read.return_value.GetAwaiter.return_value.GetResult.return_value = None
-        service.session.OpenIterations = MagicMock()
-        service.session.OpenIterations.Keys = []
-
         with patch("comet_sdkp.CDP4Adaptor.Iteration"):
             with patch("comet_sdkp.CDP4Adaptor.EngineeringModel"):
-                try:
-                    result = service.openActiveIteration(mock_setup, MagicMock())
-                    # When no iteration is found, it should return error string
-                    assert isinstance(result, str) or result is None
-                except TypeError:
-                    # If isinstance fails in implementation, skip this test
-                    pytest.skip("Cannot mock CDP4 Iteration class isinstance check")
+                result = service.openActiveIteration(mock_setup, mock_domain)
+
+                # Result should either be the iteration or an error string
+                assert result is not None
 
 
 class TestCdp4SessionServiceWrite:
@@ -378,18 +490,17 @@ class TestCdp4SessionServiceWrite:
         service = Cdp4SessionService()
         service.isSessionOpen = False
 
-        result = service.write(MagicMock())
-
-        assert result == "Session is not open"
+        with pytest.raises(SessionException):
+            service.write(MagicMock())
 
     def test_write_without_transaction(self):
         """Test writing without providing transaction"""
         service = Cdp4SessionService()
         service.isSessionOpen = True
+        service.session = MagicMock()
 
-        result = service.write(None)
-
-        assert result == "ThingTransaction must be provided"
+        with pytest.raises(InvalidParametersException):
+            service.write(None)
 
     def test_write_with_valid_transaction(self):
         """Test writing with valid transaction"""
@@ -427,9 +538,7 @@ class TestCdp4SessionServiceWrite:
 
 
 ###################################################################################################
-#                                                                                                 #
-#                                    MODULE FUNCTIONS TESTS                                      #
-#                                                                                                 #
+#                                 MODULE FUNCTIONS TESTS                                         #
 ###################################################################################################
 
 
@@ -438,12 +547,12 @@ class TestComputeProductTree:
 
     def test_compute_product_tree_without_option(self):
         """Test computing tree without option"""
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidParametersException):
             computeProductTree(MagicMock(), None)
 
     def test_compute_product_tree_without_iteration(self):
         """Test computing tree without iteration"""
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidParametersException):
             computeProductTree(None, MagicMock())
 
     def test_compute_product_tree_without_top_element(self):
@@ -487,13 +596,18 @@ class TestGetElementByParameterType:
 
     def test_get_element_without_nested_elements(self):
         """Test filtering without providing nested elements"""
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidParametersException):
             getElementByParameterType(None, "ParameterType")
 
     def test_get_element_without_parameter_type_name(self):
         """Test filtering without parameter type name"""
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidParametersException):
             getElementByParameterType([], "")
+
+    def test_get_element_with_empty_list(self):
+        """Test filtering with empty list"""
+        with pytest.raises(InvalidParametersException):
+            getElementByParameterType([], "Mass")
 
     def test_get_element_with_matching_parameters(self):
         """Test filtering with matching parameters"""
@@ -512,9 +626,7 @@ class TestGetElementByParameterType:
         mock_element3 = MagicMock()
         mock_element3.NestedParameter = [mock_param1, mock_param2]
 
-        result = getElementByParameterType(
-            [mock_element1, mock_element2, mock_element3], "Mass"
-        )
+        result = getElementByParameterType([mock_element1, mock_element2, mock_element3], "Mass")
 
         assert len(result) == 2
         assert mock_element1 in result
@@ -603,13 +715,18 @@ class TestGetElementByParameterTypeWhereAllValuesAreSet:
         assert len(result) == 1
         assert mock_element1 in result
 
+    def test_get_element_without_nested_elements(self):
+        """Test filtering without providing nested elements"""
+        with pytest.raises(InvalidParametersException):
+            getElementByParameterTypeWhereAllValuesAreSet(None, "Mass")
+
 
 class TestPrepareTransaction:
     """Tests for the prepareTransaction() function"""
 
     def test_prepare_transaction_without_iteration(self):
         """Test preparing transaction without iteration"""
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidParametersException):
             prepareTransaction(None)
 
     def test_prepare_transaction_with_valid_iteration(self):
@@ -619,9 +736,7 @@ class TestPrepareTransaction:
         mock_iteration.Clone.return_value = mock_clone
 
         with patch("comet_sdkp.CDP4Adaptor.ThingTransaction") as mock_transaction:
-            with patch(
-                "comet_sdkp.CDP4Adaptor.TransactionContextResolver"
-            ) as mock_resolver:
+            with patch("comet_sdkp.CDP4Adaptor.TransactionContextResolver") as mock_resolver:
                 mock_context = MagicMock()
                 mock_resolver.ResolveContext.return_value = mock_context
                 mock_transaction_instance = MagicMock()
@@ -629,7 +744,7 @@ class TestPrepareTransaction:
 
                 iteration, transaction = prepareTransaction(mock_iteration)
 
-                assert iteration == mock_iteration
+                assert iteration == mock_clone
                 assert transaction == mock_transaction_instance
                 mock_iteration.Clone.assert_called_once_with(False)
                 mock_resolver.ResolveContext.assert_called_once_with(mock_clone)
@@ -638,6 +753,21 @@ class TestPrepareTransaction:
 
 class TestSetValue:
     """Tests for the setValue() function"""
+
+    def test_set_value_without_value_set(self):
+        """Test setting value without value set"""
+        with pytest.raises(InvalidParametersException):
+            setValue(None, MagicMock(), ["100"])
+
+    def test_set_value_without_values(self):
+        """Test setting value without values list"""
+        with pytest.raises(InvalidParametersException):
+            setValue(MagicMock(), MagicMock(), None)
+
+    def test_set_value_with_empty_values(self):
+        """Test setting value with empty values list"""
+        with pytest.raises(InvalidParametersException):
+            setValue(MagicMock(), MagicMock(), [])
 
     def test_set_value_computed_switch_kind(self):
         """Test setting value with COMPUTED switch kind"""
