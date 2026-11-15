@@ -160,17 +160,16 @@ pip install -e ".[dev]"
 # All tests
 pytest tests/ -v
 
-# Unit tests only
-pytest tests/unit/ -v
+# One kind of test, by marker: unit, integration, smoke or live
+pytest -m unit -v
 
 # A single test
 pytest tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_with_valid_parameters -v
-
-# With a coverage report
-pytest tests/ --cov=comet_sdkp --cov-report=term-missing
 ```
 
-The tests mock the .NET libraries and do not need a CDP4-COMET server.
+Every run reports coverage and writes an HTML report to `coverage_html/`; pass `--no-cov` to switch that off.
+
+The unit, integration and smoke tests mock the .NET libraries and do not need a CDP4-COMET server. The tests in `tests/live/` run against a real server and are skipped unless `COMET_TEST_SERVER_URL`, `COMET_TEST_USERNAME` and `COMET_TEST_PASSWORD` are set; see the [Contributing Guide](docs/contributing.md).
 
 ### Code Quality
 

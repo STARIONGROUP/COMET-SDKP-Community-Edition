@@ -81,5 +81,5 @@ service.write(transaction)
 
 - [Getting Started Guide](../guides/getting_started.md)
 - [Installation Guide](../guides/installation.md)
-- [Examples](../guides/examples.md)
+- [Example script](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/blob/development/examples/script.py)
 - [FAQ](../guides/faq.md)

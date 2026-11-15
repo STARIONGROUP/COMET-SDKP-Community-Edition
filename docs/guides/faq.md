@@ -23,7 +23,7 @@ The SDK is actively maintained and suitable for production use. However, always 
 ### Where can I get help?
 
 - **Documentation**: Read this documentation
-- **Examples**: Check the [examples](examples.md)
+- **Examples**: Check the [example script](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/blob/development/examples/script.py)
 - **GitHub Issues**: [Report bugs](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/issues)
 - **Discussions**: Join [GitHub Discussions](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/discussions)
 - **COMET Documentation**: [Official COMET Docs](https://comet-dev-docs.mbsehub.org/)
@@ -323,7 +323,7 @@ See [Contributing Guide](../contributing.md) for details.
 ## More Help
 
 - 📖 [Getting Started](getting_started.md)
-- 💡 [Examples](examples.md)
+- 💡 [Example script](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/blob/development/examples/script.py)
 - 🔧 [Troubleshooting](troubleshooting.md)
 - 📚 [API Reference](../api/comet_sdkp.md)
 - 🌐 [COMET Documentation](https://comet-dev-docs.mbsehub.org/)

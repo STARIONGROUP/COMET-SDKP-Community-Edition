@@ -105,7 +105,8 @@ python_functions = ["test_*"]
 # Custom pytest markers
 markers = [
     "unit: mark test as a unit test (no external dependencies)",
-    "integration: mark test as an integration test (may require external resources)",
+    "integration: mark test as an integration test (several components together, .NET mocked)",
+    "live: mark test as requiring a running CDP4-COMET server (see tests/live)",
     "smoke: mark test as a smoke test (basic functionality checks)",
     "slow: mark test as slow (takes longer to execute)",
     "skip_ci: mark test to skip in CI/CD pipelines",
@@ -136,7 +137,6 @@ extend-exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 100
-target_version = "py312"
 skip_gitignore = true
 known_first_party = ["comet_sdkp"]
 known_third_party = ["pythonnet"]
@@ -187,11 +187,24 @@ ignore_errors = true
 
 [tool.pylint.messages_control]
 disable = [
-    "C0330",  # wrong hanging indentation before block
-    "C0326",  # bad whitespace
     "R0913",  # too-many-arguments
     "R0914",  # too-many-locals
     "W0212",  # protected-access
+    # The public API mirrors the camelCase naming of the .NET CDP4-COMET SDK
+    "C0103",  # invalid-name
+    # Failures of the .NET SDK surface as arbitrary exception types. The API reports them as an
+    # error string or an empty result instead of raising, so it has to catch Exception
+    "W0718",  # broad-exception-caught
+]
+
+[tool.pylint.typecheck]
+# pythonnet and the .NET namespaces, which only exist at runtime
+ignored-modules = [
+    "clr",
+    "System",
+    "CDP4Common",
+    "CDP4Dal",
+    "CDP4ServicesDal",
 ]
 
 [tool.pylint.format]
@@ -200,7 +213,7 @@ max-line-length = 100
 [tool.pylint.design]
 max-attributes = 10
 max-locals = 20
-max-arguments = 10
+max-args = 10
 
 ###################################################################################################
 #                                  BUILD & DISTRIBUTION                                          #
@@ -211,5 +224,4 @@ max-arguments = 10
 include = [
     "README.md",
     "LICENSE",
-    "CHANGELOG.md",
 ]

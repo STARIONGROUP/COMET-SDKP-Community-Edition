@@ -193,5 +193,5 @@ except Exception as e:
 ## Next Steps
 
 - [API Reference](../api/index.md) - Learn about all available classes and functions
-- [Examples](examples.md) - See more advanced examples
+- [Example script](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/blob/development/examples/script.py) - See a more advanced example
 - [Troubleshooting](troubleshooting.md) - Fix common issues

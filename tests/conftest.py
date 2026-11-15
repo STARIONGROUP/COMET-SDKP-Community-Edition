@@ -9,9 +9,10 @@ This module provides:
 
 import os
 import sys
-import pytest
+from pathlib import Path
 from unittest.mock import MagicMock
 
+import pytest
 
 ###################################################################################################
 #                                   SESSION-SCOPED FIXTURES                                      #
@@ -111,40 +112,31 @@ def clean_env(monkeypatch):
 ###################################################################################################
 
 
-def pytest_configure(config):
-    """
-    Configure pytest with custom markers and settings.
-
-    Args:
-        config: pytest config object
-    """
-    config.addinivalue_line("markers", "unit: mark test as a unit test (no external dependencies)")
-    config.addinivalue_line(
-        "markers", "integration: mark test as an integration test (may require external resources)"
-    )
-    config.addinivalue_line(
-        "markers", "smoke: mark test as a smoke test (basic functionality checks)"
-    )
-    config.addinivalue_line("markers", "slow: mark test as slow (takes longer to execute)")
-    config.addinivalue_line("markers", "skip_ci: mark test to skip in CI/CD pipelines")
+# The markers themselves are registered in pyproject.toml ([tool.pytest.ini_options]).
+_TESTS_DIR = Path(__file__).parent
+_DIRECTORY_MARKERS = ("unit", "integration", "smoke", "live")
 
 
 def pytest_collection_modifyitems(config, items):
     """
     Modify test collection to add markers based on test location.
 
+    A test gets the marker named after the directory it lives in directly under ``tests/``.
+    The directory is taken from the path relative to ``tests/``, so that the location of the
+    repository on disk has no influence on the markers.
+
     Args:
         config: pytest config object
         items: list of collected test items
     """
     for item in items:
-        # Auto-mark tests in specific directories
-        if "unit" in str(item.fspath):
-            item.add_marker(pytest.mark.unit)
-        elif "integration" in str(item.fspath):
-            item.add_marker(pytest.mark.integration)
-        elif "smoke" in str(item.fspath):
-            item.add_marker(pytest.mark.smoke)
+        try:
+            relative_parts = Path(str(item.fspath)).relative_to(_TESTS_DIR).parts
+        except ValueError:
+            continue
+
+        if len(relative_parts) > 1 and relative_parts[0] in _DIRECTORY_MARKERS:
+            item.add_marker(getattr(pytest.mark, relative_parts[0]))
 
 
 ###################################################################################################

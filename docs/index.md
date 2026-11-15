@@ -2,7 +2,7 @@
 
 Welcome to the **COMET SDKP Community Edition** documentation!
 
-This is a Python SDK that provides bindings to the CDP4 (COMET Data Exchange Protocol) via the C++ SDK, enabling seamless integration between COMET and other systems.
+This is a Python SDK that provides bindings to the CDP4 (COMET Data Exchange Protocol) via the .NET CDP4-COMET SDK, enabling seamless integration between COMET and other systems.
 
 ## 🚀 Quick Start
 
@@ -25,14 +25,13 @@ print(f"Found {len(models)} models")
 ### Getting Started
 - [Installation Guide](guides/installation.md) - Install and configure the SDK
 - [Getting Started Guide](guides/getting_started.md) - Your first CDP4 project
-- [Examples](guides/examples.md) - Practical code examples
+- [Example script](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/blob/development/examples/script.py) - Practical code example
 
 ### API Reference
 - [Cdp4SessionService](api/comet_sdkp.md) - Main service class and utility functions
 - [API Index](api/index.md) - Complete API overview
 
 ### Additional Resources
-- [Architecture](architecture/overview.md) - System design and architecture
 - [FAQ](guides/faq.md) - Frequently asked questions
 - [Troubleshooting](guides/troubleshooting.md) - Common issues and solutions
 - [Contributing Guide](contributing.md) - How to contribute to the project
@@ -73,7 +72,7 @@ For information about CDP4-COMET concepts, data model, and types:
 
 - [Installation](guides/installation.md) - Get started in 5 minutes
 - [Getting Started](guides/getting_started.md) - Comprehensive tutorial
-- [Examples](guides/examples.md) - Copy-paste ready code samples
+- [Example script](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/blob/development/examples/script.py) - Complete example script
 - [API Reference](api/comet_sdkp.md) - Complete API documentation
 - [FAQ](guides/faq.md) - Common questions answered
 
@@ -85,11 +84,9 @@ For information about CDP4-COMET concepts, data model, and types:
 
 guides/installation
 guides/getting_started
-guides/examples
 api/index
 guides/faq
 guides/troubleshooting
-architecture/overview
 contributing
 ```
 

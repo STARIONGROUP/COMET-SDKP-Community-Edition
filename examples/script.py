@@ -17,17 +17,20 @@ Usage:
 """
 
 import logging
+
 from comet_sdkp.CDP4Adaptor import (
     Cdp4SessionService,
+    InvalidParametersException,
+    SessionException,
     computeProductTree,
     getElementByParameterType,
     getElementByParameterTypeWhereAllValuesAreSet,
     prepareTransaction,
     setValue,
-    SessionException,
-    InvalidParametersException,
 )
-from CDP4Common.EngineeringModelData import ParameterSwitchKind
+
+# The .NET namespaces can only be imported after comet_sdkp.CDP4Adaptor has loaded the libraries
+from CDP4Common.EngineeringModelData import ParameterSwitchKind  # isort: skip
 
 # Configure logging to see debug messages
 logging.basicConfig(
