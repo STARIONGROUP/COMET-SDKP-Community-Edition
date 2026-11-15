@@ -14,10 +14,11 @@ Requires Python 3.12+. Using the SDK for real (not the tests) also needs a .NET 
 pip install -e ".[dev]"        # tests + black, isort, mypy, pylint, build, twine
 pip install -e ".[docs]"       # sphinx toolchain
 
-pytest                                        # all tests
+pytest                                        # all tests, with coverage (HTML report in coverage_html/)
+pytest --no-cov                               # without coverage
+pytest -m unit                                # one kind: unit, integration, smoke or live
 pytest tests/unit/test_CDP4Adaptor.py         # one file
 pytest tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_with_valid_parameters
-pytest --cov=comet_sdkp --cov-report=term-missing
 
 black src/ tests/ examples/ --check
 isort src/ tests/ examples/ --check-only
@@ -55,19 +56,11 @@ This is inconsistent by design and callers (and the README examples) depend on i
 
 ## Tests
 
-No test touches .NET or a server. Each test module replaces `clr`, `System*` and `CDP4*` in `sys.modules` with `MagicMock` *before* importing `comet_sdkp.CDP4Adaptor`, and `tests/conftest.py` does the same in a session fixture. Consequences:
+pytest is configured in `pyproject.toml` only. Each test gets the marker of its directory under `tests/` (`unit`, `integration`, `smoke`, `live`), assigned in `tests/conftest.py`; `--strict-markers` is on, so a new marker must be registered in `pyproject.toml`.
 
-- Every .NET type inside the module under test is a `MagicMock`, so tests can only check the wrapper's own control flow. Anything that depends on real pythonnet behaviour (enum handling in `setValue`, `IEnumerable` conversion, `Predicate[...]`) is not covered and has to be checked against a real server with `examples/script.py`.
+`tests/unit`, `tests/integration` and `tests/smoke` never touch .NET or a server. Each of those test modules replaces `clr`, `System*` and `CDP4*` in `sys.modules` with `MagicMock` *before* importing `comet_sdkp.CDP4Adaptor`, and `tests/conftest.py` does the same in a session fixture. Consequences:
+
+- Every .NET type inside the module under test is a `MagicMock`, so these tests can only check the wrapper's own control flow. `tests/integration/` is mocked in the same way; it only combines more calls per test.
 - A new .NET namespace imported in `CDP4Adaptor.py` must be added to the mock lists in both test modules and `conftest.py`, or the tests fail at import.
-- `tests/integration/` is also fully mocked. The only tests meant for a live server at `http://localhost:5000` are in `TestRealServerIntegration`, and they are disabled by a hard-coded `skipif` that has to be edited to run them.
 
-Configuration traps:
-
-- `pytest.ini` takes precedence, so the `[tool.pytest.ini_options]` block in `pyproject.toml` (coverage `addopts`, `--strict-markers`) is ignored. Coverage only runs when `--cov` is passed.
-- `conftest.py` auto-marks tests by looking for `unit` / `integration` / `smoke` as a substring of the test's full path. The repository directory name contains "Comm**unit**y", so in a default clone every test gets the `unit` marker and the other two branches never fire. Select by directory (`pytest tests/unit`) rather than by `-m`.
-
-## Known stale references
-
-- `test_output.txt` is a committed test run from another machine, not a fixture.
-- The README and `docs/contributing.md` mention `docs/guides/examples.md`, `docs/architecture/overview.md`, `setup.py`, `CHANGELOG.md` and a GitHub Actions pipeline; none of these exist in the repository.
-- The module docstring of `CDP4Adaptor.py` says it wraps a "C++" SDK; the SDK is .NET.
+`tests/live` runs against a real CDP4-COMET server and is skipped unless `COMET_TEST_SERVER_URL`, `COMET_TEST_USERNAME` and `COMET_TEST_PASSWORD` are set. Its `adaptor` fixture (`tests/live/conftest.py`) takes the mocks out of `sys.modules`, imports `CDP4Adaptor` against the real pythonnet and DLLs, and restores the mocks afterwards. Live tests must take the module from that fixture and not import `comet_sdkp.CDP4Adaptor` at module level, which would give them the mocked one. Anything that depends on real pythonnet behaviour (enum handling in `setValue`, `IEnumerable` conversion, `Predicate[...]`) can only be covered there or with `examples/script.py`.

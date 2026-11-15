@@ -443,5 +443,5 @@ except Exception as e:
 
 - [Installation Guide](../guides/installation.md)
 - [Getting Started Guide](../guides/getting_started.md)
-- [Examples](../guides/examples.md)
+- [Example script](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/blob/development/examples/script.py)
 - [Troubleshooting](../guides/troubleshooting.md)

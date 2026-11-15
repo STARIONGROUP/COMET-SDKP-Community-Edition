@@ -7,13 +7,12 @@ Tests cover:
 - Transaction preparation and value setting
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch, PropertyMock
-from typing import List
-
 # Mock the CDP4 imports before importing the module
 import sys
-from unittest.mock import MagicMock
+from typing import List
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
+
+import pytest
 
 sys.modules["clr"] = MagicMock()
 sys.modules["System"] = MagicMock()
@@ -29,17 +28,16 @@ sys.modules["CDP4Dal.Operations"] = MagicMock()
 sys.modules["CDP4ServicesDal"] = MagicMock()
 
 from comet_sdkp.CDP4Adaptor import (
+    Cdp4Exception,
     Cdp4SessionService,
+    InvalidParametersException,
+    SessionException,
     computeProductTree,
     getElementByParameterType,
     getElementByParameterTypeWhereAllValuesAreSet,
     prepareTransaction,
     setValue,
-    Cdp4Exception,
-    SessionException,
-    InvalidParametersException,
 )
-
 
 ###################################################################################################
 #                                      BASIC TESTS                                                #
@@ -100,7 +98,27 @@ class TestCdp4SessionServiceOpen:
 
     def test_open_with_valid_parameters(self):
         """Test opening a session with valid parameters"""
-        pytest.skip("Requires actual CDP4 server running on http://localhost")
+        service = Cdp4SessionService()
+
+        with patch("comet_sdkp.CDP4Adaptor.Uri") as mock_uri_class:
+            with patch("comet_sdkp.CDP4Adaptor.Credentials") as mock_credentials_class:
+                with patch("comet_sdkp.CDP4Adaptor.Session") as mock_session_class:
+                    result = service.open("http://localhost:5000", "user", "pass")
+
+                    # open() returns None on success
+                    assert result is None
+                    assert service.isSessionOpen is True
+                    assert service.session is mock_session_class.return_value
+
+                    # The session is built from the provided URI and credentials, then opened
+                    mock_uri_class.assert_called_once_with("http://localhost:5000")
+                    mock_credentials_class.assert_called_once_with(
+                        "user", "pass", mock_uri_class.return_value
+                    )
+                    mock_session_class.assert_called_once_with(
+                        service.dal, mock_credentials_class.return_value, service.messageBus
+                    )
+                    mock_session_class.return_value.Open.assert_called_once_with()
 
     def test_open_when_session_already_open(self):
         """Test opening a session when already open"""
@@ -202,7 +220,6 @@ class TestCdp4SessionServiceOpen:
                     assert service.session is None
 
 
-# ... (resto del código igual) ...
 class TestCdp4SessionServiceClose:
     """Tests for the close() method"""
 

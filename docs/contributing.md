@@ -57,8 +57,8 @@ pytest tests/unit/ -v
 # With coverage
 pytest tests/ --cov=comet_sdkp
 
-# Integration tests (requires server)
-pytest tests/integration/ -v -m "not skipif"
+# Live tests (require a CDP4-COMET server, see below)
+pytest tests/live/ -v
 ```
 
 #### Code Style
@@ -82,22 +82,23 @@ pytest tests/integration/ -v -m "not skipif"
 
 ```
 COMET-SDKP-Community-Edition/
-├── comet_sdkp/           # Main package
-│   ├── CDP4Adaptor.py
-│   ├── __init__.py
-│   └── ...
+├── src/
+│   └── comet_sdkp/       # Main package
+│       ├── CDP4Adaptor.py
+│       ├── __init__.py
+│       └── libs/         # .NET libraries of the CDP4-COMET SDK
 ├── tests/                # Test suite
 │   ├── unit/
 │   ├── integration/
 │   ├── smoke/
+│   ├── live/             # Tests against a real server
 │   └── ...
 ├── docs/                 # Documentation
 │   ├── guides/
 │   ├── api/
 │   ├── _build/
 │   └── ...
-├── setup.py              # Package configuration
-├── pytest.ini            # Test configuration
+├── pyproject.toml        # Package, test and tool configuration
 └── README.md
 ```
 
@@ -122,9 +123,31 @@ pytest tests/unit/test_CDP4Adaptor.py::TestCdp4SessionServiceOpen::test_open_wit
 # Run with coverage
 pytest --cov=comet_sdkp --cov-report=html
 
-# Run only integration tests
-pytest tests/integration/ -m "not skipif"
+# Run only the tests of one kind, by marker
+pytest -m unit
+pytest -m integration
+pytest -m smoke
 ```
+
+Each test gets the marker of its directory under `tests/` (`unit`, `integration`, `smoke` or `live`).
+The pytest configuration is in `pyproject.toml`; it measures coverage on every run and writes an
+HTML report to `coverage_html/`. Pass `--no-cov` to switch that off.
+
+### Running the Live Tests
+
+The unit, integration and smoke tests replace the .NET libraries with mocks and need no server.
+The tests in `tests/live/` use the real libraries and a running CDP4-COMET server. They are skipped
+unless these environment variables are set:
+
+```bash
+export COMET_TEST_SERVER_URL=http://localhost:5000
+export COMET_TEST_USERNAME=admin
+export COMET_TEST_PASSWORD=pass
+
+pytest tests/live/ -v
+```
+
+On Windows PowerShell, use `$env:COMET_TEST_SERVER_URL = "http://localhost:5000"` and so on.
 
 ### Building Documentation
 
@@ -196,7 +219,7 @@ class TestNewFeature:
 
 ## Review Process
 
-1. **Automated Checks**: GitHub Actions runs tests and linting
+1. **Checks**: Run the tests and the code quality tools locally before you submit
 2. **Code Review**: Maintainers review your code
 3. **Revisions**: Make requested changes
 4. **Approval**: Code is approved and merged

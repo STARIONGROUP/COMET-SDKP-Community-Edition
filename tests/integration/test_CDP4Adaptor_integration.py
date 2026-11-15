@@ -5,10 +5,11 @@ These tests simulate real-world scenarios with more realistic object hierarchies
 and interactions between components.
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch, call
-from typing import List
 import sys
+from typing import List
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
 
 # Mock CDP4 modules
 sys.modules["clr"] = MagicMock()
@@ -26,15 +27,14 @@ sys.modules["CDP4ServicesDal"] = MagicMock()
 
 from comet_sdkp.CDP4Adaptor import (
     Cdp4SessionService,
+    InvalidParametersException,
+    SessionException,
     computeProductTree,
     getElementByParameterType,
     getElementByParameterTypeWhereAllValuesAreSet,
     prepareTransaction,
     setValue,
-    InvalidParametersException,
-    SessionException,
 )
-
 
 ###################################################################################################
 #                                         FIXTURES                                                #
@@ -701,95 +701,3 @@ class TestEndToEndWorkflows:
         domains = mock_session_service.getAvailableDomains(mock_model1)
         assert len(domains) == 1
         assert mock_domain in domains
-
-
-###################################################################################################
-#                        REAL INTEGRATION TESTS (Require CDP4 Server)                            #
-###################################################################################################
-
-
-@pytest.mark.integration
-class TestRealCDP4Integration:
-    """Integration tests against a real CDP4 server
-
-    These tests require a running CDP4 server at http://localhost:5000
-    with username 'admin' and password 'pass'
-
-    To enable these tests, set the skipif parameter to False.
-    """
-
-    @pytest.mark.skipif(
-        True,  # Set to False when CDP4 server is available
-        reason="Requires CDP4 server at http://localhost:5000. Disable this skip condition to run.",
-    )
-    def test_real_session_connection(self):
-        """Test actual connection to real CDP4 server"""
-        service = Cdp4SessionService()
-
-        result = service.open("http://localhost:5000", "admin", "pass")
-
-        try:
-            assert service.isSessionOpen is True
-            assert result is None
-
-            # Test retrieving site directory
-            site_dir = service.session.RetrieveSiteDirectory()
-            assert site_dir is not None
-            assert hasattr(site_dir, "Model")
-        finally:
-            # Cleanup
-            if service.isSessionOpen:
-                service.close()
-
-    @pytest.mark.skipif(
-        True,
-        reason="Requires CDP4 server at http://localhost:5000. Disable this skip condition to run.",
-    )
-    def test_real_get_participant_models(self):
-        """Test getting participant models from real server"""
-        service = Cdp4SessionService()
-
-        result = service.open("http://localhost:5000", "admin", "pass")
-
-        try:
-            assert service.isSessionOpen is True
-
-            models = service.getParticipantModels()
-            assert isinstance(models, list)
-            # Verify we got some models (may be 0 if test account has no models)
-            assert len(models) >= 0
-        finally:
-            if service.isSessionOpen:
-                service.close()
-
-    @pytest.mark.skipif(
-        True,
-        reason="Requires CDP4 server at http://localhost:5000 with test data. Disable this skip condition to run.",
-    )
-    def test_real_open_iteration(self):
-        """Test opening an actual iteration from real server"""
-        service = Cdp4SessionService()
-
-        result = service.open("http://localhost:5000", "admin", "pass")
-
-        try:
-            assert service.isSessionOpen is True
-
-            models = service.getParticipantModels()
-            assert isinstance(models, list)
-
-            # If there are models, try to get their domains
-            if len(models) > 0:
-                model = models[0]
-                site_dir = service.session.RetrieveSiteDirectory()
-
-                # Find the corresponding setup
-                setups = [m for m in site_dir.Model if m.Iid == model.Iid]
-
-                if len(setups) > 0:
-                    setup = setups[0]
-                    domains = service.getAvailableDomains(setup)
-                    assert isinstance(domains, list)
-        finally:
-            if service.isSessionOpen:
-                service.close()

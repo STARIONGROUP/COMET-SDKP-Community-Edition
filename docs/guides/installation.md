@@ -311,7 +311,7 @@ After successful installation:
 
 1. **Run a quick test**: Use the verification command above
 2. **Read the Getting Started guide**: [Getting Started Guide](getting_started.md)
-3. **Check the examples**: [Examples](examples.md)
+3. **Check the example**: [Example script](https://github.com/STARIONGROUP/COMET-SDKP-Community-Edition/blob/development/examples/script.py)
 4. **Browse the API Reference**: [API Reference](../api/comet_sdkp.md)
 
 ## Getting Help
